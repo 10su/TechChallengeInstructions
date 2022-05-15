@@ -1,10 +1,10 @@
-provider "aws" {# This is the AWS provider created to deploy the cloud infrastructure, for the requirement we can lock the terraform version to a required version
+provider "aws" {                     # AWS infrastructure
   region = var.regionname
   access_key = var.access_key
   secret_key = var.secret_key
 }
 
-resource "aws_instance" "docker_instance" { # This is the EC2 instance that has been created to deploy the docker containers
+resource "aws_instance" "docker_instance" {    #Ec2 Instance launch
   ami           = var.ami
   instance_type = "t2.micro"
   subnet_id = data.aws_subnet.docker_subnet.id
@@ -14,10 +14,9 @@ resource "aws_instance" "docker_instance" { # This is the EC2 instance that has 
     Name = "docker_instance"
   }
 
-  user_data = <<-EOF
-    #!/bin/bash
-  sudo apt-get update
-  sudo apt-get -y install \
+  #!/bin/bash                   # Docker installing on instance
+sudo apt-get update
+sudo apt-get install \
     ca-certificates \
     curl \
     gnupg \
@@ -31,38 +30,46 @@ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
 EOF
 }
 
-data "aws_vpc" "default" { # Data Source block could be used to fetch the default vpc details, or this could be used to fetch information about vpc from cloud
+data "aws_vpc" "default" {    # Provided with Default VPC
   default = true
 }
 
-data "aws_subnet" "docker_subnet" { # Data Source block could be used to fetch the subnet details, if there is decision to not create a new subnet and to make use of existing cloud infrastructure
+data "aws_subnet" "docker_subnet" {     # Subnet association
   filter {
     name   = "tag:Name"
     values = ["dockersubnet"]
 
   }
 }
-output "subnetid" { #Output block has been used to fetch and verify the subnet id details to pass this as an argument for resource creations
-  value = data.aws_subnet.docker_subnet.id
+
+resource "aws_db_instance" "default" {     # Creating postgre database for backend storage
+  allocated_storage    = 10
+  engine               = "postgresql"
+  engine_version       = "10.7"
+  instance_class       = "db.t3.micro"
+  name                 = "MyDB"
+  username             = "gtdapp"
+  password             = "stayconnected"
+  skip_final_snapshot  = true
 }
 
-resource "aws_security_group" "docker_security_group" { #Security group is getting created as this would be associated for an ec2 instance and port 22 is opened
-  name        = "docker_SG"
-  vpc_id      = data.aws_vpc.default.id
+resource "aws_security_group" "docker_security_group" {     # assigning security groups
+  name   = "docker_SG"
+  vpc_id = data.aws_vpc.default.id
 
   ingress {
 
-    from_port        = 22
-    to_port          = 22
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
+    from_port   = 22
+    to_port     = 22
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
 
   }
 
@@ -70,37 +77,31 @@ resource "aws_security_group" "docker_security_group" { #Security group is getti
     Name = "docker_SG"
   }
 }
-resource "aws_db_instance" "default" {
-  allocated_storage    = 10
-  engine               = "postgres"
-  engine_version       = "14.2"
-  instance_class       = "db.t3.micro"
-  name                 = "serviandb"
-  username             = "postgres"
-  password             = "changeme"
-  skip_final_snapshot  = true
+
+resource "aws_autoscaling_group" "request_auto_scale" {           #Auto scaling on workload
+  launch_configuration = [aws_launch_configuration.test_launch.id]
+  min_size = 1
+  max_size = 5
+  health_check_type = "EC2"
+  desired_capacity = 2
+  tag {
+    key = "Auto-scale"
+    value = "request_auto_scale"
+    propagate_at_launch = true
+  }
 }
-resource "aws_security_group" "db_security_group" {
-  name        = "db_SG"
-  vpc_id      = data.aws_vpc.default.id
 
-  ingress {
 
-    from_port        = 5432
-    to_port          = 5432
-    protocol         = "tcp"
-    cidr_blocks      = ["0.0.0.0/0"]
-  }
+resource "aws_launch_configuration" "test_launch" {       #Auto-scaling deployment required configurations
+  name            = "My_launch"
+  image_id        = var.ami
+  instance_type   = "t2.micro"
+  user_data       = file("user-data.sh")
+  security_groups = [aws_security_group.docker_security_group.id]
+  key_name        = "Suhas"
 
-  egress {
-    from_port        = 0
-    to_port          = 0
-    protocol         = "-1"
-    cidr_blocks      = ["0.0.0.0/0"]
 
-  }
-
-  tags = {
-    Name = "db_sg"
+  lifecycle {
+    create_before_destroy = true
   }
 }
