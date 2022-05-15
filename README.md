@@ -1,97 +1,80 @@
-# Servian Technical Challenge
+# Deployment GTD application backed by a PostgreSQL database into a AWS cloud environment.
 
-This is the Servian Tech challenge. We use this challenge to help measure a candidate's technical capabilities and fit for working at Servian.
 
-The scope of this challenge is to deploy a simple GTD application backed by a PostgreSQL database into a cloud environment of your choice (AWS, Azure, or GCP).
+# Create AWS VPC
+-Created a AWS virtual private cloud (VPC)
+-considering default VPC at designated region.
 
-## Assessment Requirements
+# Create AWS subnet Allocation
+-Provided with subnet associated to 
 
-The solution you come up with should be able to be deployed into an empty cloud environment with no existing infrastructure in place.
+# Create AWS Instace launch
+- Defined with desired AMI.
+- Allocated with type of instance.
+- Associate security group for instance.
+- Specific key name.
 
-There _should not_ be a requirement for Servian to access your cloud environment to deploy this solution.
+# Installing Docker on instance launched
+-Defining on User data file for docker installed.
+-Automate the DOcker tool to launch and pull the image from repository to create container.
 
-Candidates should demonstrate good git practices and work flows i.e. Regular commits.
+# Created a Postgre Database backend 
+- Defined postgre database to store user data.
+- Specified engine version to run.
+- Snapshot been captured for Backup.
 
-There is no time limit on the solution, however we recommend you spend no more than 2 hours.
+# Auto Scaling enabled to handle the load
+- Defined with auto scaling for workload and based on reuested hitting the instance.
+- Health checks enabled to monitor and arrange the fleet on service.
+- Pre-defined AMI, Instance type and user data configurations have been deployed.
 
-Documentation should be included in an README.md file as part of the solution, which highlights the following:
 
-- How to provision the solution and deploy the application.
-- High level architecture (This can be a diagram or a simple description of the architecture, be ready to talk about it in your interview).
-- High level description of improvements (if any).
+# Enhanced approach to run the Application with AWS services
+- By using Amazon Elastic Container service (ECS ) 
+- Introducing Elastic Load Balancers (ELB) and Route53 specifications.
 
-## Submission
+# Issues en-countered during the techchallenge
+- Docker image provided was unable to hold the container runtime, container was created and exiting frequently.
+- Tried to troubleshoot the container issue with various docker commands.
+- checked and verified to docker serve and accessing the container.
 
-To submit your solution, please provide the URL to your repo with all of your supporting artefacts to the Servian Talent Aquision team member who you have been engaged with. You can simply reply to the email that they sent you with initial instructions and links to this repo.
+# Docker PS history 
+root@ip-172-31-10-170:/home/ubuntu# docker ps -a
+CONTAINER ID   IMAGE                             COMMAND                CREATED          STATUS                      PORTS     NAMES
+3e2400afdcf1   centos                            "/bin/bash"            4 seconds ago    Exited (0) 4 seconds ago              distracted_thompson
+f269866fe360   centos                            "/bin/bash"            55 seconds ago   Exited (0) 54 seconds ago             awesome_lalande
+###f68afaeec24c   servian/techchallengeapp:latest   "./TechChallengeApp"   13 minutes ago   Exited (0) 13 minutes ago             interesting_heyrovsky
 
-## Assessment Grading Criteria
 
-### Key Criteria
+# Docker logs captured for exiting frequently
 
-Candidates should take care to ensure that their submission meets the following criteria:
 
-- Must be able to start from a cloned git repo.
-- Must document any prerequisites clearly.
-- Must be contained within a GitHub repository.
-- Must deploy via an automated process.
-- Must deploy infrastructure using code.
+root@ip-172-31-10-170:/home/ubuntu# docker logs --follow a75f73bc7402
+[root@a75f73bc7402 /]# exit
 
-### Things are we looking for
 
-We will be looking at the following areas for your solution:
+root@ip-172-31-10-170:/home/ubuntu# docker logs f68afaeec24c
 
-#### Coding Style
+ .:ooooool,      .:odddddl;.      .;ooooc. .l,          ;c.    ::.      'coddddoc'         ,looooooc.
+'kk;....';,    .lOx:'...,cxkc.   .dOc....  .xO'        ,0d.   .kk.    ,xko;....;okx,     .xkl,....;dOl.
+:Xl           .xO,         :0d.  ;Kl        ,0o       .dO'    .kk.   :0d.        .d0:   .xO'        lK:
+.oOxc,.       lKl...........oK:  :Kc         l0;      :Kc     .kk.  .Ok.          .kO.  '0d         '0d
+  .;ldddo;.   oXkdddddddddddxx,  :Kc         .kk.    .Ox.     .kk.  '0d            d0'  '0d         '0d
+       .cOk.  lKc                :Kc          :0l    o0;      .kk.  .Ok.          .k0'  '0d         '0d
+         cXc  .xO;         ..    :Kc          .d0'  ;0o       .kk.   :0d.        .dN0'  '0d         '0d
+,c,....'cOx.   .lOxc,...':dkc.   :Kc           'Ox',kk.       .kk.    ,xko;'..';okk00,  '0d         '0d   ';;;;;;;;;;,.
+'looooool;.      .;ldddddo:.     'l'            .lool.         ::       'coddddoc'.;l.  .l;         .c;  .cxxxxxxxxxxo.
 
-- Readability & Clarity of code
-- Comments (Where relevant)
-- Consistency of Coding
+This application is used as part of challenging potential candiates at Sevian.
 
-#### Security
+Please visit http://Servian.com for more details
 
-- Network segmentation (Default VPC/VNETs are acceptable however be prepared to dive into how you would segment your network should you have created a VPC).
-- Secret management.
-- Platform security features.
+Usage:
+  TechChallengeApp [command]
 
-#### Simplicity
+Available Commands:
+  help        Help about any command
+  serve       Starts the web server
+  updatedb    Updates DB
 
-- No superfluous dependencies.
-- Do not overengineer the solution (If you have additional ideas beyond the minimum required to satisfy the key requirements, document them down in your README.md and they can be discussed in the technical interview).
-
-#### Resiliency
-
-- Highly available frontend
-- Auto Scaling solution is desired (If you do not implement auto scaling, be prepared to talk about how you would architect this).
-- Highly available Database.
-
-#### CICD
-
-You can either code or explain how the following could be accomplished:
-
-- CI/CD pipeline for deployment
-- Any tests to check for success or failure of the pipeline.
-
-## Application Details
-
-The [TechChallengeApp](https://github.com/servian/TechChallengeApp) is a single page application designed to be run inside a container with a PostgreSQL database to store data.
-
-It is completely self contained, and should not require any additional dependencies to run.
-
-`docker pull servian/techchallengeapp:latest`
-
-## Configuration
-
-The [application can be configured](https://github.com/servian/TechChallengeApp/blob/master/doc/config.md) with a file `conf.toml` or environment variables.
-
-## Start server
-
-`./TechChallengeApp updatedb` to create a database and seed it with test data
-
-`./TechChallengeApp serve` will start serving requests
-
-## Endpoints
-
-`/` - root endpoint that will load the SPA
-
-`/api/tasks/` - api endpoint to create, read, update, and delete tasks
-
-`/healthcheck/` - Used to validate the health of the application
+  FOR clear logs capture, please refer in the edit of Readme file.
