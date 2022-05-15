@@ -6,9 +6,9 @@
 -considering default VPC at designated region.
 
 # Create AWS subnet Allocation
--Provided with subnet associated to 
+-Provided with subnet associated to EC2.
 
-# Create AWS Instace launch
+# Create AWS Instance launch
 - Defined with desired AMI.
 - Allocated with type of instance.
 - Associate security group for instance.
@@ -18,7 +18,7 @@
 -Defining on User data file for docker installed.
 -Automate the DOcker tool to launch and pull the image from repository to create container.
 
-# Created a Postgre Database backend 
+# Created a Postgre Database backend to the application
 - Defined postgre database to store user data.
 - Specified engine version to run.
 - Snapshot been captured for Backup.
